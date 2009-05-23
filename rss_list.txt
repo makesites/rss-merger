@@ -1,0 +1,3 @@
+http://feeds.feedburner.com/makesites?format=xml
+http://feeds.feedburner.com/SaveMyGameNet?format=xml
+http://feeds.feedburner.com/dreamway?format=xml
