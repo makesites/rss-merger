@@ -1,3 +1,3 @@
-http://feeds.feedburner.com/makesites?format=xml
-http://feeds.feedburner.com/SaveMyGameNet?format=xml
-http://feeds.feedburner.com/dreamway?format=xml
+http://www.theinquirer.net/inquirer.rss
+http://feeds.feedburner.com/zdnet/open-source?format=xml
+http://alistapart.com/rss.xml

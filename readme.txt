@@ -1,6 +1,6 @@
 ##############################################################
 
-RSS Merger v1.0
+RSS Merger v1.1
 
 Created by: Makis Tracend (makis@makesites.cc)
 URL: http://www.makesites.cc/author/makis/
@@ -23,6 +23,7 @@ It works fine right out of the box but you may want to edit some of the global v
 
 $site_name 		: Replace this with your website's title
 $site_url 		: Replace this with your website's URL
+$site_info 		: A small description of your site or this feed's purpose
 $rss_list 		: A text file with all your feed URLs listed, one per line
 $xml_encoding 	: The encoding you want the final XML file to have
 $num_of_items 	: The number of items it will collect from each feed, counted off the top of the RSS feed. 
@@ -31,7 +32,10 @@ $num_of_items 	: The number of items it will collect from each feed, counted off
 Changelog
 =========
 
-27-01-2008 	Initial release. Basic parsing & caching functionality created. 
+01-02-2008 	(v1.1) 	Bug fix: Absence of a description or title for the XML file could break structure of the final XML output.
+					Improvement: Made the description of the final XML output a variable.
+
+27-01-2008 	(v1.0) 	Initial release: Basic parsing & caching functionality created. 
 
 
 Copyright
