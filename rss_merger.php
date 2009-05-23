@@ -6,108 +6,123 @@ $site_url = 'http://my-domain-name.com';				/* Replace this with your website's 
 $site_info = 'A selection of my RSS collection'; 		/* A small description of your site or this feed's purpose */
 
 $rss_list = 'rss_list.txt';								/* Where the file with all your is located */
+$cached_rss = 'rss_merger.xml'; 						/*  The cache RSS file that will be created */
+
 $xml_encoding = 'UTF-8';								/* The encoding you want the final XML file to have */
 $num_of_items = '2';									/* The number of items it will collect from each feed, counted off the top of the RSS feed. */
 
-$script_version = '1.1';								/* Used for internal purposes */
+$script_version = '1.2';								/* This script's version - For internal use, please don't modify */
 
-runScript();
 
-/* this is where the script process is initiated */
-function runScript() {
-	$is_current = checkCache();
+$rss = new RSS_Merger();
+unset($rss);
+
+class RSS_Merger { 
+
+  /* this is where the script process is initiated */
+  function __construct() {
+    global $cached_rss;
+
+    $is_current = $this->checkCache();
 	if ( $is_current ) {
-		header('Location: ./rss_merger.xml');
+		header('Location: ./' . $cached_rss);
 		exit;
 	} else {
-		gatherItems();
+		$this->gatherNews();
 	}
-}
+  }
 
-/* see if we have a fairly recent xml file already created*/
-function checkCache() {
-	if (file_exists('rss_merger.xml')) {
-		$time_difference = @(time() - filemtime('rss_merger.xml'));
-		if( $time_difference < 1000 ) {
-			$status = true;
-		} else {
-			$status = false;
-		}
+  /* see if we have a fairly recent xml file already created*/
+  function checkCache() {
+    global $cached_rss;
+
+    if (file_exists( $cached_rss ) && strlen(file_get_contents($cached_rss)) > 0 ) {
+      $time_difference = @(time() - filemtime( $cached_rss ));
+   	  if( $time_difference < 1000 ) {
+        $status = true;
+      } else {
+        $status = false;
+      }
+    } else {
+      $status = false;
+    }
+    return $status;
+   }
+
+  /* loop through the rss URLs and gather the items */
+  function gatherNews() {
+    global $rss_list, $num_of_items;
+
+    /* read the $rss_list file and create an array with its contents */
+    $rss_urls = file($rss_list);
+    $rss_items = array();
+
+   foreach ($rss_urls as $rss_url) {
+	  // read the XML file
+      $xml = simplexml_load_file($rss_url, null, false);
+	  if( $xml ){
+	      // get the first two elements 
+		  $max_num = min( count( $xml->channel->item ), $num_of_items) ;
+	      for ($i=0; $i< $max_num; $i++) {
+		    $item = $xml->channel->item[$i];
+            // create a sub-array for each item
+		    $new['title'] = $item->title;
+		    $new['link'] = $item->link;
+		    $new['description'] = $item->description;
+		    $new['pubDate'] = $item->pubDate;
+		    $new['guid'] = $item->guid;
+		    $new['date'] = strtotime($item->pubDate);
+            // insert it in the items array
+            array_push($rss_items, $new );
+	      }
+	  }
+    }
+	//sort the items according to date
+	usort($rss_items, array(&$this, 'sortByDate'));  
+    $this->outputXML($rss_items);
+  }
+  
+  static function sortByDate( $a , $b ){ 
+    if( $a['date'] == $b['date'] ) {  
+      return 0;  
+    } elseif( $a['date'] > $b['date'] ){
+	  return -1;
 	} else {
-		$status = false;
+	  return 1;
 	}
-	return $status;
-}
+  }
 
-/* read the $rss_list file and create an array with its contents */
-function rssList() {
-	global $rss_list;
-	$array = file($rss_list);
-	return $array;
-}
+  /* the final step in our process - output the final xml file with combined data */
+  function outputXML($rss_items) {
+    global $site_name, $site_url, $site_info, $xml_encoding, $num_of_items, $script_version, $cached_rss;
 
-/* loop through the rss URLs and gather the items */
-function gatherItems() {
-	$rss_list = rssList();
-	$rss_items = array();
-
-	foreach ($rss_list as $rss_url) {
-		array_push($rss_items, parseRSS($rss_url) );
-	}
-	outputXML($rss_items);
-}
-
-/* the main parsing process - each rss feed is parsed seperately as the function outputs an array with items */
-function parseRSS($rss_url) {
-	$array = array();
-	$array[title] = array();
-	$array[link] = array();
-	$array[description] = array();
-	// get contents of the RSS into a string
-	$file = fopen($rss_url, "r");
-	$contents = fread($file, strlen(file_get_contents($rss_url)));
-	fclose($file);
-	$contents = stristr($contents, '<item');
-	preg_match_all("'<title(| .*?)>(.*?)</title>'si", $contents, $array[title], PREG_SET_ORDER);
-	preg_match_all("'<link(| .*?)>(.*?)</link>'si", $contents, $array[link], PREG_SET_ORDER);
-	preg_match_all("'<description(| .*?)>(.*?)</description>'si", $contents, $array[description], PREG_SET_ORDER);
-	return $array;
-}
-
-/* the final step in our process - output the final xml file with combined data */
-function outputXML($rss_items) {
-    global $site_name, $site_url, $site_info, $xml_encoding, $num_of_items, $script_version;
-	$output = '<?xml version="1.0" encoding="' . $xml_encoding . '"?>' . "\n";
-	$output .= '<rss version="2.0">' . "\n";
-	$output .= "\t" . '<channel>' . "\n";
-	$output .= "\t\t" . '<title>' . $site_name . '</title>' . "\n";
-	$output .= "\t\t" . '<link>' . $site_url . '</link>' . "\n";
-	$output .= "\t\t" . '<description>' . $site_info . '</description>' . "\n";
-	$output .= "\t\t" . '<pubDate>' . date(DATE_RFC822) . '</pubDate>' . "\n";
-	$output .= "\t\t" . '<generator>http://www.makesites.cc/programming/by-makis/rss_merger_v' . str_replace('.', '', $script_version) . '/</generator>' . "\n";
-	$output .= "\t\t" . '<language>en</language>' . "\n";
+    $output = '<?xml version="1.0" encoding="' . $xml_encoding . '"?>' . "\n";
+    $output .= '<rss version="2.0">' . "\n";
+    $output .= "\t" . '<channel>' . "\n";
+    $output .= "\t\t" . '<title>' . $site_name . '</title>' . "\n";
+    $output .= "\t\t" . '<link>' . $site_url . '</link>' . "\n";
+    $output .= "\t\t" . '<description>' . $site_info . '</description>' . "\n";
+    $output .= "\t\t" . '<pubDate>' . date(DATE_RFC822) . '</pubDate>' . "\n";
+    $output .= "\t\t" . '<generator>RSS Merger v' . $script_version . ' : http://www.makesites.cc/projects/rss_merger </generator>' . "\n";
+    $output .= "\t\t" . '<language>en</language>' . "\n";
 
     foreach ($rss_items as $item) {
-		for($i=0; $i<$num_of_items; $i++) {
-			$output .= "\t\t" . '<item>' . "\n";
-			$output .= "\t\t\t" . $item[title][$i][0] . "\n";
-			$output .= "\t\t\t" . $item[link][$i][0] . "\n";
-			$output .= "\t\t\t" . $item[description][$i][0] . "\n";
-			$output .= "\t\t" . '</item>' . "\n\n";
-		}
+      $output .= "\t\t" . '<item>' . "\n";
+      $output .= "\t\t\t" . '<title>' . $item['title'] . '</title>' . "\n";
+      $output .= "\t\t\t" . '<link>' . $item['link'] . '</link>' . "\n";
+      $output .= "\t\t\t" . '<description><![CDATA[' . $item['description'] . ']]></description>' . "\n";
+      $output .= "\t\t\t" . '<pubDate>' . $item['pubDate'] . '</pubDate>' . "\n";
+      $output .= "\t\t" . '</item>' . "\n\n";
     }
-	$output .= "\t" . '</channel>' . "\n";
-	$output .= '</rss>';
+    $output .= "\t" . '</channel>' . "\n";
+    $output .= '</rss>';
 
-	createCache($output);
+	// create the cache file for later use...
+	file_put_contents($cached_rss, $output, LOCK_EX);
+
 	echo $output;
-}
+  }
 
-/* create a cache file with the xml content so that the script does not become CPU intensive from repetitive calls */
-function createCache($output) {
-	$file=fopen('rss_merger.xml',"w");
-	fwrite($file,$output);
-	fclose($file);
 }
 
 ?>
