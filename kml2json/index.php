@@ -11,12 +11,11 @@
 define("FILE", "example.kml"); // the name of the kml file - altertively you can pass it in the URL with the "u" variable name
 define("SHOW_LABELS", true); // define if you want to show the point text as labels on the map 
 
-// Basic setup
+// Parse XML
 $xmlUrl = ( isset($_REQUEST["u"]) ) ? $_REQUEST["u"] : FILE; 
-$xmlStr = file_get_contents($xmlUrl);
-$xml = simplexml_load_string($xmlStr);
+$xml = simplexml_load_file($xmlUrl, 'SimpleXMLElement',LIBXML_NSCLEAN); 
 
-// split the data in the sections we want
+// Get the basic data set we want to use
 $placemarks = $xml->xpath("/kml/Document/Folder/Placemark");
 
 $items = array();
