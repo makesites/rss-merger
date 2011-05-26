@@ -1,6 +1,18 @@
 <?php
-// there is a known issue with the kml namespace on the exported file - manually removing the namespaces should let the parsing work properly
-$xmlUrl = ( isset($_REQUEST["u"]) ) ? $_REQUEST["u"] : "example.kml"; 
+// KML to JSON converter
+//////////////////////////
+// by Makis Tracend (makis@makesit.es)
+// Currently used to export plolygons  and markers (labels) in a ECMA-script friendly form
+// NOTE: there is a known issue with the kml namespace on the exported file. 
+// 		 Manually removing the namespaces should let the parsing work properly
+
+
+// Configutation
+define("FILE", "example.kml"); // the name of the kml file - altertively you can pass it in the URL with the "u" variable name
+define("SHOW_LABELS", true); // define if you want to show the point text as labels on the map 
+
+// Basic setup
+$xmlUrl = ( isset($_REQUEST["u"]) ) ? $_REQUEST["u"] : FILE; 
 $xmlStr = file_get_contents($xmlUrl);
 $xml = simplexml_load_string($xmlStr);
 
@@ -19,7 +31,7 @@ foreach( $placemarks as $polycount => $placemark ){
 		$items[$name] = array();
 		$items[$name]["coords"] = generateCoords( $placemark->Polygon->outerBoundaryIs->LinearRing->coordinates );
 		$items[$name]["color"] = getStyle( substr( (string)$placemark->styleUrl , 1) );
-	} else if( !empty($placemark->Point) ) {
+	} else if( !empty($placemark->Point)&& SHOW_LABELS ) {
 		//it's a point
 		$name = (string) $placemark->name;
 		$items[$name]["label"] = getLabel( $placemark );
