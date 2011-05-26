@@ -1676,7 +1676,7 @@
 			</Polygon>
 		</Placemark>
 		<Placemark>
-			<name>FDA177 T2 LABEL</name>
+			<name>FDA177 T2</name>
 			<LookAt>
 				<longitude>153.0235699986896</longitude>
 				<latitude>-27.50382303424481</latitude>
@@ -1695,7 +1695,7 @@
 			</Point>
 		</Placemark>
 		<Placemark>
-			<name>FDA178 T3 LABEL</name>
+			<name>FDA178 T3</name>
 			<LookAt>
 				<longitude>153.0235699986896</longitude>
 				<latitude>-27.50382303424481</latitude>
@@ -1714,7 +1714,7 @@
 			</Point>
 		</Placemark>
 		<Placemark>
-			<name>FDA175 T2 LABEL</name>
+			<name>FDA175 T2</name>
 			<LookAt>
 				<longitude>153.0235699986896</longitude>
 				<latitude>-27.50382303424481</latitude>
