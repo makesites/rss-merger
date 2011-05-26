@@ -1,6 +1,6 @@
 <?php
 // there is a known issue with the kml namespace on the exported file - manually removing the namespaces should let the parsing work properly
-$xmlUrl = "example.kml"; 
+$xmlUrl = ( isset($_REQUEST["u"]) ) ? $_REQUEST["u"] : "example.kml"; 
 $xmlStr = file_get_contents($xmlUrl);
 $xml = simplexml_load_string($xmlStr);
 
