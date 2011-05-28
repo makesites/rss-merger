@@ -1,6 +1,6 @@
 ##############################################################
 
-RSS Merger v1.2
+RSS Merger v1.21
 
 Created by: Makis Tracend (makis@makesites.cc)
 URL: http://www.makesites.cc/projects/rss_merger
@@ -30,6 +30,8 @@ $num_of_items 	: The number of items it will collect from each feed, counted off
 
 Changelog
 =========
+23-05-2009 	(v1.21) Removed extra information before the <rss> tag to better support feedburner
+
 14-06-2008 	(v1.2) 	Re-written parsing function for PHP 5 using the SimpleXML extension. Items now sorted by date.
 
 01-02-2008 	(v1.1) 	Bug fix: Absence of a description or title for the XML file could break structure of the final XML output.
