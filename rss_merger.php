@@ -59,9 +59,7 @@ class RSS_Merger {
 
    foreach ($rss_urls as $rss_url) {
 	  // read the XML file
-	  $rss_data = file_get_contents($rss_url);
-	  $rss_data = substr($rss_data, strpos($rss_data, "<rss"));
-      $xml = simplexml_load_string($rss_data, null, LIBXML_NOWARNING);
+      $xml = simplexml_load_file($rss_url, null, false);
 	  if( $xml ){
 	      // get the first two elements 
 		  $max_num = min( count( $xml->channel->item ), $num_of_items) ;
