@@ -11,7 +11,7 @@ namespace Taophp;
  * @author Stéphane Mourey <stephane.mourey@impossible-exil.info>
  * @copyright 2009-2011 Makis Tracend <makis@makesites.cc>
  * @author Makis Tracend
- * @version 2.0.1-pre-alpha Fork-Day-ONe
+ * @version 2.1.0-alpha Fork-Day-ONe
  * */
 
 class rssFileCache implements rssCacheInt {

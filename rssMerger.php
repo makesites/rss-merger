@@ -11,11 +11,11 @@ namespace Taophp;
  * @author Stéphane Mourey <stephane.mourey@impossible-exil.info>
  * @copyright 2009-2011 Makis Tracend <makis@makesites.cc>
  * @author Makis Tracend
- * @version 2.0.1-pre-alpha Fork-Day-One
+ * @version 2.1.0-alpha Fork-Day-One
  * */
 
 class rssMerger {
-	const SCRIPT_VERSION = '2.0.1-Pre-alpha';
+	const SCRIPT_VERSION = '2.1.0-alpha';
 	const SCRIPT_NAME = 'Rss Merger';
 	const SCRIPT_URL = 'https://github.com/taophp/rss-merger';
 
@@ -166,8 +166,8 @@ class rssMerger {
 	protected function outputXML($rssItems) {
 		$t=$n='';
 		if ($this->formatted) {
-			$t="t";
-			$n="n";
+			$t="\t";
+			$n="\n";
 		}
 		$output = '<?xml version="1.0" encoding="' . $this->xmlEncoding . '"?>' . $n;
 		$output .= '<rss version="2.0">' . $n;
@@ -177,12 +177,12 @@ class rssMerger {
 		$output .= $t.$t . '<description>' . $this->feedDesc . '</description>' . $n;
 		$output .= $t.$t . '<pubDate>' . date(DATE_RFC822) . '</pubDate>' . $n;
 		$output .= $t.$t . '<generator>'.self::SCRIPT_NAME.' v' . self::SCRIPT_VERSION . ' : '.self::SCRIPT_URL.' </generator>' . $n;
-		$output .= $t.$t . '<language>en</language>' . $n;
+		$output .= $t.$t . '<language>'.$this->lang.'</language>' . $n;
 
 		foreach ($rssItems as $item) {
 			$output .= $t.$t . '<item>' . $n;
 			$output .= $t.$t.$t . '<title>' . $item['title'] . '</title>' . $n;
-			$output .= $t.$t.$t . '<link>' . $item['link'] . '</link>' . $n
+			$output .= $t.$t.$t . '<link>' . $item['link'] . '</link>' . $n;
 			$output .= $t.$t.$t . '<description><![CDATA[' . $item['description'] . ']]></description>' . $n;
 			$output .= $t.$t.$t . '<pubDate>' . $item['pubDate'] . '</pubDate>' . $n;
 			$output .= $t.$t . '</item>' . $n.$n;
@@ -214,7 +214,7 @@ class rssMerger {
 	 * */
 	public function setCache(object $cache)
 	{
-		if (!in_array('rssCacheInt',class_implements($cache))
+		if (!in_array('rssCacheInt',class_implements($cache)))
 			throw new Exception('rssMerger::setCache expects an objet that implements the rssCaheInt interface.');
 		$this->cache = $cache;
 		return $this;

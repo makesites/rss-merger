@@ -1,6 +1,6 @@
 ########################################################################
 
-RSS Merger v2.0.0-Pre-alpha
+RSS Merger v2.1.0-alpha
 
 Forked by Stéphane Mourey (stephane.mourey@impossible-exil.info)
 URL: http://impossible-exil.info
@@ -8,10 +8,6 @@ Created by: Makis Tracend (makis@makesites.cc)
 URL: http://www.makesites.cc/projects/rss_merger
 
 ########################################################################
-
-
-** THIS A PRE-ALPHA VERSION !  DO NOT USE IN PRODUCTION ! **
-============================================================
 
 Description
 ===========
@@ -49,11 +45,13 @@ $mymerger->addRssFeeds(array(
 
 // Get the resulting RSS feed in a string
 $rssString = $mymerger->getMerged();
+header('Content-Type: application/rss+xml; charset=UTF-8');
 echo $rssString;
 ```
 
 With file cache :
-```
+
+```php
 <?php
 require_once('rssMerger.php');
 require_once('rssCacheInt.php');
