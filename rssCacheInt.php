@@ -9,7 +9,7 @@ namespace Taophp;
  * @license http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU Public License version 2
  * @copyright 2014 Stéphane Mourey <stephane.mourey@impossible-exil.info>
  * @author Stéphane Mourey <stephane.mourey@impossible-exil.info>
- * @version 2.1.3-beta First-usable
+ * @version 2.2.0-beta More usable
  * */
 
 interface rssCacheInt {
@@ -39,6 +39,6 @@ interface rssCacheInt {
 	*
 	* @return bool true if usable, false if not
 	* */
-	public function checkCache($feedId);
+	public function checkRSSCache($feedId);
 
 }

@@ -11,11 +11,11 @@ namespace Taophp;
  * @author Stéphane Mourey <stephane.mourey@impossible-exil.info>
  * @copyright 2009-2011 Makis Tracend <makis@makesites.cc>
  * @author Makis Tracend
- * @version 2.1.3-beta First-usable
+ * @version 2.2.0-beta More usable
  * */
 
 class rssMerger {
-	const SCRIPT_VERSION = '2.1.0-alpha';
+	const SCRIPT_VERSION = '2.2.0-beta';
 	const SCRIPT_NAME = 'Rss Merger';
 	const SCRIPT_URL = 'https://github.com/taophp/rss-merger';
 
@@ -95,7 +95,7 @@ class rssMerger {
 	 * @return string the new RSS feed
 	 * */
 	public function getMerged(){
-		if ($this->checkCache()) {
+		if ($this->checkRSSCache()) {
 			return $this->cache->getRSSCache($this->getFeedId());
 		}
 		return $this->gatherNews();
@@ -106,9 +106,9 @@ class rssMerger {
 	 *
 	 * @return bool
 	 * */
-	protected function checkCache() {
+	protected function checkRSSCache() {
 		if(!$this->cache) return false;
-		return $this->cache->checkCache($this->getFeedId());
+		return $this->cache->checkRSSCache($this->getFeedId());
 	}
 
 	/**

@@ -11,7 +11,7 @@ namespace Taophp;
  * @author Stéphane Mourey <stephane.mourey@impossible-exil.info>
  * @copyright 2009-2011 Makis Tracend <makis@makesites.cc>
  * @author Makis Tracend
- * @version 2.1.3-beta First-usable
+ * @version 2.2.0-beta More usable
  * */
 
 class rssFileCache implements rssCacheInt {
@@ -19,10 +19,6 @@ class rssFileCache implements rssCacheInt {
 	protected $dir;
 	/** @type int the maximum age of a usable cache in milliseconds */
 	public $maxAge = 1000; /** default: one second */
-	/** @type string base url to use with redirection */
-	protected $baseUrlRedirection;
-	/** @type bool true if the client was redirect on the last call of getRSSCache */
-	protected $redirected = false;
 
 	/**
 	 *	The constructor
@@ -44,7 +40,7 @@ class rssFileCache implements rssCacheInt {
 	 * @return bool
 	 * */
 	 public function feedRSSCache($feedId,$toStore){
-		return file_put_contents($this->getFileStoreFromId($feedId),$toStore);
+		return file_put_contents($this->getFileFullNameFromFeedId($feedId),$toStore);
 	 }
 
 	/**
@@ -55,40 +51,7 @@ class rssFileCache implements rssCacheInt {
 	 * @return string the stored string (RSS XML)
 	 * */
 	public function getRSSCache($feedId){
-		if ($this->baseUrlRedirection)
-			$this->redirect($feedId);
-		else
-			$this->redirected = false;
-		return file_get_contents($this->getFileStoreFromId($feedId));
-	}
-
-	/**
-	 *	Send an header message to redirect the client to the cached file
-	 *
-	 * @param string the id of the cached feed
-	 *
-	 * @return rssFileCache $this
-	 * */
-	public function redirect($feedId){
-		if ($this->baseUrlRedirection && !headers_sent())
-		{
-			header('Location: '.$this->baseUrlRedirection.'/'.$this->getFilenameFromFeedId($feedId));
-			$this->redirected = true;
-		}else{
-			$this->redirected = false;
-			throw new \Exception("rssFileCache cannot redirect if its method setBaseUrlRedirection was not used.");
-		}
-		return $this;
-	}
-
-	/**
-	 *	Tell if a redirection http header was sent to the client
-	 *
-	 * @return bool true if a redirection http header was sent
-	 * */
-	public function wasRedirected()
-	{
-		return $this->redirected;
+		return file_get_contents($this->getFileFullNameFromFeedId($feedId));
 	}
 
 	/**
@@ -98,8 +61,8 @@ class rssFileCache implements rssCacheInt {
 	 *
 	 * @return bool true if usable, false if not
 	 * */
-	public function checkCache($feedId){
-		$filename = $this->getFileStoreFromId($feedId);
+	public function checkRSSCache($feedId){
+		$filename = $this->getFileFullNameFromFeedId($feedId);
 		return file_exists($filename)
 						&& filesize($filename)
 						&& (time()-filemtime($filename) < $this->maxAge);
@@ -112,7 +75,7 @@ class rssFileCache implements rssCacheInt {
 	 *
 	 * @return string the complete filename
 	 * */
-	protected function getFileStoreFromId($feedId){
+	protected function getFileFullNameFromFeedId($feedId){
 		return $this->dir.'/'.$this->getFilenameFromFeedId($feedId);
 	}
 
@@ -125,18 +88,6 @@ class rssFileCache implements rssCacheInt {
 	 * */
 	protected function getFilenameFromFeedId($feedId){
 		return $feedId.'.rss';
-	}
-
-	/**
-	 *	Set the base url to use to redirect the client to cached file
-	 *
-	 * @param string $url the base url
-	 *
-	 * @return rssFileCache $this
-	 * */
-	public function setBaseUrlRedirection($url){
-		$this->baseUrlRedirection = $url;
-		return $this;
 	}
 
 }

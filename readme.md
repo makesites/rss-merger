@@ -1,6 +1,6 @@
 ########################################################################
 
-RSS Merger 2.1.3-beta First-usable
+RSS Merger 2.2.0-beta More usable
 
 Forked by Stéphane Mourey (stephane.mourey@impossible-exil.info)
 URL: http://impossible-exil.info
@@ -59,8 +59,6 @@ require_once('rssFileCache.php');
 
 // create the cache from a directory path
 $cache = new Taophp\rssFileCache('/path/to/my/store/directory');
-// set a baseurl to redirect the client to the cached file when possible
-$cache->setBaseUrlRedirection('http://url.to/my/store/directory');
 
 $mymerger = new Taophp\rssMerger();
 $mymerger	->setCache($cache)
@@ -68,19 +66,6 @@ $mymerger	->setCache($cache)
 
 // Get the resulting RSS feed in a string
 $rssString = $mymerger->getMerged();
-
-// check if the client was redirected to the cached file
-// should be true if setBaseUrlRedirection was called
-if ($cache->wasRedirected()) {
-	// the client was redirected, no output after this will be visible
-	die();
-}else{
-	// the client was not redirected, you should either
-	// redirect it to the new cache file
-	// or output the content
-	// or what you wanna do
-	$cache->redirect($mymerger->getFeedId());
-}
 ```
 
 Requirements
@@ -89,6 +74,8 @@ PHP >= 5.3
 
 Changelog
 =========
+15-09-2014	(v2.2.0-beta) Removing the ability for rssFileCache to redirect to a cached file, which seems to have been a bad idea from Makis Tracend
+
 15-09-2014	(v2.1.3-beta) Some tests and fixes. Should work well. Please submit an issue if any.
 
 12-09-2014	(v2.0.1-Pre-alpha) Adding rssCacheInt interface and rssFileCache class, re-enabled the cache use in rssMerger in a new way, some renaming, and documentation, adding a feature to enable or disable the output formatting
