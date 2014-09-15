@@ -11,7 +11,7 @@ namespace Taophp;
  * @author Stéphane Mourey <stephane.mourey@impossible-exil.info>
  * @copyright 2009-2011 Makis Tracend <makis@makesites.cc>
  * @author Makis Tracend
- * @version 2.1.0-alpha Fork-Day-ONe
+ * @version 2.1.3-beta First-usable
  * */
 
 class rssFileCache implements rssCacheInt {
@@ -20,7 +20,7 @@ class rssFileCache implements rssCacheInt {
 	/** @type int the maximum age of a usable cache in milliseconds */
 	public $maxAge = 1000; /** default: one second */
 	/** @type string base url to use with redirection */
-	proteced $baseUrlRedirection;
+	protected $baseUrlRedirection;
 	/** @type bool true if the client was redirect on the last call of getRSSCache */
 	protected $redirected = false;
 
@@ -29,9 +29,9 @@ class rssFileCache implements rssCacheInt {
 	 *
 	 * @param string $dir the directory where to store the files
 	 * */
-	public function __contruct($dir){
+	public function __construct($dir){
 		if (!is_dir($dir) || !is_writable($dir))
-			throw new Exception('The directory used to store data must be a writable directory');
+			throw new \Exception('The directory used to store data must be a writable directory');
 		$this->dir = $dir;
 	}
 
@@ -69,14 +69,14 @@ class rssFileCache implements rssCacheInt {
 	 *
 	 * @return rssFileCache $this
 	 * */
-	public redirect($feedId){
+	public function redirect($feedId){
 		if ($this->baseUrlRedirection && !headers_sent())
 		{
 			header('Location: '.$this->baseUrlRedirection.'/'.$this->getFilenameFromFeedId($feedId));
 			$this->redirected = true;
 		}else{
 			$this->redirected = false;
-			throw new Exception("rssFileCache cannot redirect if its method setBaseUrlRedirection was not used.")
+			throw new \Exception("rssFileCache cannot redirect if its method setBaseUrlRedirection was not used.");
 		}
 		return $this;
 	}

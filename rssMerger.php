@@ -11,7 +11,7 @@ namespace Taophp;
  * @author Stéphane Mourey <stephane.mourey@impossible-exil.info>
  * @copyright 2009-2011 Makis Tracend <makis@makesites.cc>
  * @author Makis Tracend
- * @version 2.1.0-alpha Fork-Day-One
+ * @version 2.1.3-beta First-usable
  * */
 
 class rssMerger {
@@ -78,10 +78,11 @@ class rssMerger {
 	 * */
 	public function addRssFeeds($feeds) {
 		$args = func_get_args();
-		if (count($args)>1) $feeds = $args;
+		if (count($args)>2 || ( count($args)==2 && $args[1]!==0)) $feeds = $args;
 		if (is_string($feeds) && strpos($feeds,',')) $feeds = explode(',',$feeds);
 		if (is_array($feeds))
-			array_walk($feeds,array($this,__METHOD__));
+			foreach ($feeds as $feed)
+				$this->addRssFeeds($feed);
 		else {
 			$this->rssList[] = $feeds;
 		}
@@ -212,10 +213,10 @@ class rssMerger {
 	 *
 	 * @return rssMerger $this
 	 * */
-	public function setCache(object $cache)
+	public function setCache($cache)
 	{
-		if (!in_array('rssCacheInt',class_implements($cache)))
-			throw new Exception('rssMerger::setCache expects an objet that implements the rssCaheInt interface.');
+		if (!in_array('Taophp\rssCacheInt',class_implements($cache)))
+			throw new \Exception('rssMerger::setCache expects an objet that implements the rssCacheInt interface. Implemented interfaces: '.print_r(class_implements($cache),true));
 		$this->cache = $cache;
 		return $this;
 	}

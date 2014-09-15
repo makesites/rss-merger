@@ -1,6 +1,6 @@
 ########################################################################
 
-RSS Merger v2.1.0-alpha
+RSS Merger 2.1.3-beta First-usable
 
 Forked by Stéphane Mourey (stephane.mourey@impossible-exil.info)
 URL: http://impossible-exil.info
@@ -62,8 +62,8 @@ $cache = new Taophp\rssFileCache('/path/to/my/store/directory');
 // set a baseurl to redirect the client to the cached file when possible
 $cache->setBaseUrlRedirection('http://url.to/my/store/directory');
 
-$merger = new Taophp\rssMerger();
-$merger	->setCache($cache)
+$mymerger = new Taophp\rssMerger();
+$mymerger	->setCache($cache)
 				->addFeeds('http://exemple.com/feed5.rss,http://exemple.com/feed6.rss');
 
 // Get the resulting RSS feed in a string
@@ -79,7 +79,7 @@ if ($cache->wasRedirected()) {
 	// redirect it to the new cache file
 	// or output the content
 	// or what you wanna do
-	$cache->redirect($merger->getFeedId());
+	$cache->redirect($mymerger->getFeedId());
 }
 ```
 
@@ -89,6 +89,8 @@ PHP >= 5.3
 
 Changelog
 =========
+15-09-2014	(v2.1.3-beta) Some tests and fixes. Should work well. Please submit an issue if any.
+
 12-09-2014	(v2.0.1-Pre-alpha) Adding rssCacheInt interface and rssFileCache class, re-enabled the cache use in rssMerger in a new way, some renaming, and documentation, adding a feature to enable or disable the output formatting
 
 11-09-2014	(v2.0.0-Pre-alpha) Move the code to my own pseudo "Coding Standard", inhibate the use of the cache
@@ -102,6 +104,12 @@ Changelog
 
 27-01-2008 	(v1.0) 	Initial release: Basic parsing & caching functionality created.
 
+
+TODO
+====
+
+* be compliant with PSR-0
+* use [Magpie RSS](https://packagist.org/packages/kellan/magpierss)
 
 Copyright
 =========
