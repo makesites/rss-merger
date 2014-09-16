@@ -174,7 +174,7 @@ class rssMerger {
 		$output .= '<rss version="2.0">' . $n;
 		$output .= $t . '<channel>' . $n;
 		$output .= $t.$t . '<title>' . $this->siteName . '</title>' . $n;
-		$output .= $t.$t . '<link>' . $this->siteUrl . '</link>' . $n;
+		$output .= $t.$t . '<link>' . htmlentities($this->siteUrl) . '</link>' . $n;
 		$output .= $t.$t . '<description>' . $this->feedDesc . '</description>' . $n;
 		$output .= $t.$t . '<pubDate>' . date(DATE_RFC822) . '</pubDate>' . $n;
 		$output .= $t.$t . '<generator>'.self::SCRIPT_NAME.' v' . self::SCRIPT_VERSION . ' : '.self::SCRIPT_URL.' </generator>' . $n;
@@ -183,7 +183,7 @@ class rssMerger {
 		foreach ($rssItems as $item) {
 			$output .= $t.$t . '<item>' . $n;
 			$output .= $t.$t.$t . '<title>' . $item['title'] . '</title>' . $n;
-			$output .= $t.$t.$t . '<link>' . $item['link'] . '</link>' . $n;
+			$output .= $t.$t.$t . '<link>' . htmlentities($item['link']) . '</link>' . $n;
 			$output .= $t.$t.$t . '<description><![CDATA[' . $item['description'] . ']]></description>' . $n;
 			$output .= $t.$t.$t . '<pubDate>' . $item['pubDate'] . '</pubDate>' . $n;
 			$output .= $t.$t . '</item>' . $n.$n;

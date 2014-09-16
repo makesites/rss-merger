@@ -74,7 +74,7 @@ PHP >= 5.3
 
 Changelog
 =========
-15-09-2014	(v2.2.0-beta) Removing the ability for rssFileCache to redirect to a cached file, which seems to have been a bad idea from Makis Tracend
+15-09-2014	(v2.2.0-beta) Removing the ability for rssFileCache to redirect to a file, which seems to have been a bad idea from Makis Tracend
 
 15-09-2014	(v2.1.3-beta) Some tests and fixes. Should work well. Please submit an issue if any.
 
