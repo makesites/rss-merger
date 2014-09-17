@@ -57,12 +57,19 @@ require_once('rssMerger.php');
 require_once('rssCacheInt.php');
 require_once('rssFileCache.php');
 
-// create the cache from a directory path
-$cache = new Taophp\rssFileCache('/path/to/my/store/directory');
-
 $mymerger = new Taophp\rssMerger();
-$mymerger	->setCache($cache)
-				->addFeeds('http://exemple.com/feed5.rss,http://exemple.com/feed6.rss');
+
+// create the cache from a directory path
+try {
+	$cache = new Taophp\rssFileCache('cache');
+} catch (Exception $e) {
+	error_log($e->getMessage());
+}
+
+// if $cache creation is successfull, associate it to the merger
+if ($cache) $mymerger	->setCache($cache);
+
+$mymerger	->addFeeds('http://exemple.com/feed5.rss,http://exemple.com/feed6.rss');
 
 // Get the resulting RSS feed in a string
 $rssString = $mymerger->getMerged();
