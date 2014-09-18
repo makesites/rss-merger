@@ -11,11 +11,11 @@ namespace Taophp;
  * @author Stéphane Mourey <stephane.mourey@impossible-exil.info>
  * @copyright 2009-2011 Makis Tracend <makis@makesites.cc>
  * @author Makis Tracend
- * @version 2.2.0-beta More usable
+ * @version 2.3.0-beta Asynchronous
  * */
 
 class rssMerger {
-	const SCRIPT_VERSION = '2.2.0-beta';
+	const SCRIPT_VERSION = '2.3.0-beta';
 	const SCRIPT_NAME = 'Rss Merger';
 	const SCRIPT_URL = 'https://github.com/taophp/rss-merger';
 
@@ -39,6 +39,8 @@ class rssMerger {
 	protected $cache;
 	/** @type bool set to true if you want the feed output to be formatted (i.e. with tabulations and linebreaks) */
 	public $formatted = false;
+	/** @type bool set true if you want download the feeds asynchroniouly */
+	public $asynchronious = true;
 
 	/**
 	 *	Set the number of items to gather from each feed
@@ -118,10 +120,47 @@ class rssMerger {
 	 * */
 	protected function gatherNews() {
 		$rssItems = array();
+		$this->checkCurlMulti();
 
-		foreach ($this->rssList as $rssUrl) {
-		$xml = simplexml_load_file($rssUrl, null, false);
-		if($xml){
+		if ($this->asynchronious)
+		{
+			/** Using CURL for asynchronious download of feeds (should must faster) */
+			$mh = curl_multi_init();
+			foreach ($this->rssList as $rssUrl)
+			{
+				$curlHls[$rssUrl] = curl_init();
+				curl_setopt($curlHls[$rssUrl], CURLOPT_URL, $rssUrl);
+				curl_setopt($curlHls[$rssUrl], CURLOPT_HEADER, 0);
+				curl_setopt($curlHls[$rssUrl], CURLOPT_RETURNTRANSFER, 1);
+				curl_multi_add_handle($mh,$curlHls[$rssUrl]);
+			}
+			$active = false;
+			do {
+				$mrc = curl_multi_exec($mh,$active);
+			} while ($mrc == CURLM_CALL_MULTI_PERFORM);
+			while ($active && $mrc == CURLM_OK) {
+//					if (curl_multi_select($mh) != -1) {											# WTF!?!
+							do {
+									$mrc = curl_multi_exec($mh, $active);
+							} while ($mrc == CURLM_CALL_MULTI_PERFORM);
+//					}
+			}
+			foreach ($curlHls as $ch)
+			{
+				$tXml = simplexml_load_string(curl_multi_getcontent($ch));
+				if ($tXml) $aXml[] = $tXml;
+			}
+		}else{
+			/** Synchornious download of feeds */
+			foreach ($this->rssList as $rssUrl)
+			{
+				$tXml = simplexml_load_file($rssUrl);
+				if($tXml)
+				if ($tXml) $aXml[] = $tXml;
+			}
+		}
+		foreach ($aXml as $xml)
+		{
 			$feedNbItems = count($xml->channel->item);
 			$maxNum = $this->nbItems2Gather ? min($feedNbItems, $this->nbItems2Gather) : $feedNbItems;
 			for ($i=0; $i< $maxNum; $i++) {
@@ -135,12 +174,27 @@ class rssMerger {
 				array_push($rssItems, $new );
 			}
 		}
-	}
 		//sort the items according to date
 		usort($rssItems, array(__CLASS__, 'sortByDate'));
 		if ($this->nbItems2Produce > 0)
 			$rssItems = array_slice($rssItems,0,$this->nbItems2Produce);
 		return $this->outputXML($rssItems);
+	}
+
+	/**
+	 *	Check if the required curl functions are available
+	 *
+	 * @return bool true if yes
+	 * */
+	function checkCurlMulti(){
+		if (!$this->asynchronious) return false;
+		$curlFunctions2Check = array('curl_multi_init','curl_multi_exec');
+		foreach ($curlFunctions2Check as $f)
+		{
+			if (!function_exists($f))
+				return $this->asynchronious = false;
+		}
+		return true;
 	}
 
 	/**

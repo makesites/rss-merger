@@ -11,7 +11,7 @@ namespace Taophp;
  * @author Stéphane Mourey <stephane.mourey@impossible-exil.info>
  * @copyright 2009-2011 Makis Tracend <makis@makesites.cc>
  * @author Makis Tracend
- * @version 2.2.0-beta More usable
+ * @version 2.3.0-beta Asynchronous
  * */
 
 class rssFileCache implements rssCacheInt {
@@ -27,7 +27,7 @@ class rssFileCache implements rssCacheInt {
 	 * */
 	public function __construct($dir){
 		if (!is_dir($dir) || !is_writable($dir))
-			throw new \Exception('The directory used to store data must be a writable directory');
+			throw new \Exception('The directory used to store data must be a writable directory.');
 		$this->dir = $dir;
 	}
 

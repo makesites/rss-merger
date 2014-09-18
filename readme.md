@@ -1,6 +1,6 @@
 ########################################################################
 
-RSS Merger 2.2.0-beta More usable
+RSS Merger 2.3.0-beta Asynchronous
 
 Forked by Stéphane Mourey (stephane.mourey@impossible-exil.info)
 URL: http://impossible-exil.info
@@ -12,10 +12,13 @@ URL: http://www.makesites.cc/projects/rss_merger
 Description
 ===========
 This script will load a number of RSS feeds and compile them into one RSS 2.0 file. You can use it to present a mash-up of your news from different places (blogs, twitter etc.) or just present news from other sources around the Net.
+This script is able to load all feeds asyncrhoniously if the [CURL extension](http://php.net/manual/ref.curl.php) is loaded, which provides a *significative* speed improvement.
+But you should *really* use it with a cache of some sort. `rssCacheInt` is a interface that will helps you to write your own, if you need, but RSS Merger come with the `rssFileCache` class, which enable the use of a cache directory on the file system.
 
 Usage
 =====
 Without cache :
+
 ```php
 <?php
 require_once('rssMerger.php');
@@ -61,7 +64,7 @@ $mymerger = new Taophp\rssMerger();
 
 // create the cache from a directory path
 try {
-	$cache = new Taophp\rssFileCache('cache');
+	$cache = new Taophp\rssFileCache('/path/to/cache/directory');
 } catch (Exception $e) {
 	error_log($e->getMessage());
 }
@@ -81,7 +84,9 @@ PHP >= 5.3
 
 Changelog
 =========
-15-09-2014	(v2.2.0-beta) Removing the ability for rssFileCache to redirect to a file, which seems to have been a bad idea from Makis Tracend
+18-09-2014	(v2.3.0-beta) Adding the ability to download all the feeds asynchroniously.
+
+15-09-2014	(v2.2.0-beta) Removing the ability for rssFileCache to redirect to a file, which seems to have been a *bad* idea from Makis Tracend, because the client should use the url of the cached file to retrieve later news, but it may be overdated or even dead.
 
 15-09-2014	(v2.1.3-beta) Some tests and fixes. Should work well. Please submit an issue if any.
 
