@@ -9,7 +9,7 @@ namespace Taophp;
  * @license http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU Public License version 2
  * @copyright 2014 Stéphane Mourey <stephane.mourey@impossible-exil.info>
  * @author Stéphane Mourey <stephane.mourey@impossible-exil.info>
- * @version 2.3.0-beta Asynchronous
+ * @version 2.3.1-beta Valid RSS Rogers
  * */
 
 interface rssCacheInt {

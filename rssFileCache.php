@@ -11,7 +11,7 @@ namespace Taophp;
  * @author Stéphane Mourey <stephane.mourey@impossible-exil.info>
  * @copyright 2009-2011 Makis Tracend <makis@makesites.cc>
  * @author Makis Tracend
- * @version 2.3.0-beta Asynchronous
+ * @version 2.3.1-beta Valid RSS Rogers
  * */
 
 class rssFileCache implements rssCacheInt {

@@ -1,6 +1,6 @@
 ########################################################################
 
-RSS Merger 2.3.0-beta Asynchronous
+RSS Merger 2.3.1-beta Valid RSS Rogers
 
 Forked by Stéphane Mourey (stephane.mourey@impossible-exil.info)
 URL: http://impossible-exil.info

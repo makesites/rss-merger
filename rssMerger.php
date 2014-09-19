@@ -11,8 +11,11 @@ namespace Taophp;
  * @author Stéphane Mourey <stephane.mourey@impossible-exil.info>
  * @copyright 2009-2011 Makis Tracend <makis@makesites.cc>
  * @author Makis Tracend
- * @version 2.3.0-beta Asynchronous
+ * @version 2.3.1-beta Valid RSS Rogers
  * */
+
+/** Loading the PEAR XML_Util Package if available */
+require_once('XML/Util.php');
 
 class rssMerger {
 	const SCRIPT_VERSION = '2.3.0-beta';
@@ -41,6 +44,18 @@ class rssMerger {
 	public $formatted = false;
 	/** @type bool set true if you want download the feeds asynchroniouly */
 	public $asynchronious = true;
+	/** @type bool true if the PEAR package XML_Util is available */
+	protected $XML_Util = false;
+
+	/**
+	 *	The constructor
+	 *
+	 * */
+	 public function __construct()
+	 {
+		 $this->XML_Util = class_exists('XML_Util') && method_exists('XML_Util','replaceEntities');
+		 if (!$this->XML_Util) error_log('RSS-Merger: Installation of the Pear Package XML util strongly recommanded !');
+	 }
 
 	/**
 	 *	Set the number of items to gather from each feed
@@ -140,6 +155,7 @@ class rssMerger {
 			} while ($mrc == CURLM_CALL_MULTI_PERFORM);
 			while ($active && $mrc == CURLM_OK) {
 //					if (curl_multi_select($mh) != -1) {											# WTF!?!
+/** @see http://fr2.php.net/manual/fr/function.curl-multi-select.php#110869 */
 							do {
 									$mrc = curl_multi_exec($mh, $active);
 							} while ($mrc == CURLM_CALL_MULTI_PERFORM);
@@ -151,7 +167,7 @@ class rssMerger {
 				if ($tXml) $aXml[] = $tXml;
 			}
 		}else{
-			/** Synchornious download of feeds */
+			/** Synchronious download of feeds */
 			foreach ($this->rssList as $rssUrl)
 			{
 				$tXml = simplexml_load_file($rssUrl);
@@ -169,8 +185,20 @@ class rssMerger {
 				$new['link'] = $item->link;
 				$new['description'] = $item->description;
 				$new['pubDate'] = $item->pubDate;
-				$new['guid'] = $item->guid;
+				$new['guid'] = $item->guid?$item->guid:$item->link; // not a real GUID if not provided, but unique and enought to validate the RSS feed
 				$new['date'] = strtotime($item->pubDate);
+				if ($this->XML_Util)
+				{
+					foreach ($new as $k=>$v)
+					{
+						$new[$k] = \XML_Util::replaceEntities(html_entity_decode($v),XML_UTIL_ENTITIES_XML,$this->xmlEncoding);
+					}
+				}else{
+					foreach ($new as $k=>$v)
+					{
+						$new[$k] = htmlentities($v);
+					}
+				}
 				array_push($rssItems, $new );
 			}
 		}
@@ -225,19 +253,21 @@ class rssMerger {
 			$n="\n";
 		}
 		$output = '<?xml version="1.0" encoding="' . $this->xmlEncoding . '"?>' . $n;
-		$output .= '<rss version="2.0">' . $n;
+		$output .= '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">' . $n;
 		$output .= $t . '<channel>' . $n;
 		$output .= $t.$t . '<title>' . $this->siteName . '</title>' . $n;
-		$output .= $t.$t . '<link>' . htmlentities($this->siteUrl) . '</link>' . $n;
+		$output .= $t.$t . '<link>' . $this->siteUrl . '</link>' . $n;
 		$output .= $t.$t . '<description>' . $this->feedDesc . '</description>' . $n;
-		$output .= $t.$t . '<pubDate>' . date(DATE_RFC822) . '</pubDate>' . $n;
+		$output .= $t.$t . '<pubDate>' . date('r') . '</pubDate>' . $n;
 		$output .= $t.$t . '<generator>'.self::SCRIPT_NAME.' v' . self::SCRIPT_VERSION . ' : '.self::SCRIPT_URL.' </generator>' . $n;
 		$output .= $t.$t . '<language>'.$this->lang.'</language>' . $n;
+		$output .= $t.$t . '<atom:link href="'.strtolower(substr($_SERVER[SERVER_PROTOCOL],0,strpos($_SERVER[SERVER_PROTOCOL],'/'))).'://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'].'" rel="self" type="application/rss+xml" />' . $n;
 
 		foreach ($rssItems as $item) {
 			$output .= $t.$t . '<item>' . $n;
 			$output .= $t.$t.$t . '<title>' . $item['title'] . '</title>' . $n;
-			$output .= $t.$t.$t . '<link>' . htmlentities($item['link']) . '</link>' . $n;
+			$output .= $t.$t.$t . '<link>' . $item['link']  . '</link>' . $n;
+			$output .= $t.$t.$t . '<guid>' . $item['guid']  . '</guid>' . $n;
 			$output .= $t.$t.$t . '<description><![CDATA[' . $item['description'] . ']]></description>' . $n;
 			$output .= $t.$t.$t . '<pubDate>' . $item['pubDate'] . '</pubDate>' . $n;
 			$output .= $t.$t . '</item>' . $n.$n;
