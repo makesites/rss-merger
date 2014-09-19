@@ -1,6 +1,6 @@
 ########################################################################
 
-RSS Merger 2.3.1-beta Valid RSS Rogers
+RSS Merger 2.3.2-beta Time Limited Edition
 
 Forked by Stéphane Mourey (stephane.mourey@impossible-exil.info)
 URL: http://impossible-exil.info
@@ -29,9 +29,6 @@ $mymerger->setNumberOfItems2Produce(10);
 
 // Set the number of items to gather from each feed (default is all)
 $mymerger->setNumberOfItems2Gather(2);
-
-// Set a "nice" output (with tabulations and line breaks)
-$mymerger->formatted = true;
 
 // Adding feeds
 // with the fluent interface
@@ -78,12 +75,51 @@ $mymerger	->addFeeds('http://exemple.com/feed5.rss,http://exemple.com/feed6.rss'
 $rssString = $mymerger->getMerged();
 ```
 
-Requirements
+Options andImportant Options
+============================
+## **Asynchronious**
+By default, we use asynchronious loading of feeds. If you experience troubles like overloaded CPU, try to turn it off this way :
+
+	$mymerger->asynchronious = false;
+
+## **Loading timeout**
+To prevent endless loading of slow feeds, we use the cURL timeout option set to 10 seconds. If you experience unloaded feed, you can try a longer one this way :
+	$mymerger->curlTimeOut = 15;	//example for 15 seconds
+
+## **Cache**
+By default, we do not use any cache, but we *strongly* recommand to use one for *many reasons*. First, make all your settings with none and then, when things work, refer the Usage section to enable one. After that, never disable it except for debuging purposes.
+
+## Formatting
+By default, we do not use line breaks or tabulations to format the output feed. If you want to, you can this way :
+
+	$mymerger->formatted = true;
+
+## Language
+You can set the language of your feed (default is english) this way:
+
+	$mymerger->lang = 'fr';	//example for french
+
+## Encoding
+By default, the output feed is encoded using UTF-8. You can change it this way:
+
+	$mymerger->xmlEncoding('UTF-16');	//example for UTF-16
+
+Dependencies
 ============
-PHP >= 5.3
+##Required:
+
+* PHP >= 5.3
+
+##Recommanded:
+* [mb_string](http://php.net/manual/book.mbstring.php)
+* [cURL](http://php.net/manual/book.curl.php)
 
 Changelog
 =========
+19-09-2014	(v2.3.2-beta) Make the script not to overload the CPU, neither to wait endlessly for a feed, adding the CDATA tag to all data, better solution that XML_Util....
+
+19-09-2014	(v2.3.1-beta) Make the script to provide valid feed in anycase (hope so!)
+
 18-09-2014	(v2.3.0-beta) Adding the ability to download all the feeds asynchroniously.
 
 15-09-2014	(v2.2.0-beta) Removing the ability for rssFileCache to redirect to a file, which seems to have been a *bad* idea from Makis Tracend, because the client should use the url of the cached file to retrieve later news, but it may be overdated or even dead.

@@ -11,11 +11,8 @@ namespace Taophp;
  * @author Stéphane Mourey <stephane.mourey@impossible-exil.info>
  * @copyright 2009-2011 Makis Tracend <makis@makesites.cc>
  * @author Makis Tracend
- * @version 2.3.1-beta Valid RSS Rogers
+ * @version 2.3.2-beta Time Limited Edition
  * */
-
-/** Loading the PEAR XML_Util Package if available */
-require_once('XML/Util.php');
 
 class rssMerger {
 	const SCRIPT_VERSION = '2.3.0-beta';
@@ -44,18 +41,8 @@ class rssMerger {
 	public $formatted = false;
 	/** @type bool set true if you want download the feeds asynchroniouly */
 	public $asynchronious = true;
-	/** @type bool true if the PEAR package XML_Util is available */
-	protected $XML_Util = false;
-
-	/**
-	 *	The constructor
-	 *
-	 * */
-	 public function __construct()
-	 {
-		 $this->XML_Util = class_exists('XML_Util') && method_exists('XML_Util','replaceEntities');
-		 if (!$this->XML_Util) error_log('RSS-Merger: Installation of the Pear Package XML util strongly recommanded !');
-	 }
+	/** @type int the maximum number of seconds to wait for a feed to merge */
+	public $curlTimeOut = 10;
 
 	/**
 	 *	Set the number of items to gather from each feed
@@ -147,20 +134,15 @@ class rssMerger {
 				curl_setopt($curlHls[$rssUrl], CURLOPT_URL, $rssUrl);
 				curl_setopt($curlHls[$rssUrl], CURLOPT_HEADER, 0);
 				curl_setopt($curlHls[$rssUrl], CURLOPT_RETURNTRANSFER, 1);
+				curl_setopt($curlHls[$rssUrl], CURLOPT_TIMEOUT, $this->curlTimeOut);
 				curl_multi_add_handle($mh,$curlHls[$rssUrl]);
 			}
 			$active = false;
 			do {
-				$mrc = curl_multi_exec($mh,$active);
-			} while ($mrc == CURLM_CALL_MULTI_PERFORM);
-			while ($active && $mrc == CURLM_OK) {
-//					if (curl_multi_select($mh) != -1) {											# WTF!?!
-/** @see http://fr2.php.net/manual/fr/function.curl-multi-select.php#110869 */
-							do {
-									$mrc = curl_multi_exec($mh, $active);
-							} while ($mrc == CURLM_CALL_MULTI_PERFORM);
-//					}
-			}
+				$mrc = curl_multi_exec($mh, $active);
+				curl_multi_select($mh);
+			} while ($active && $mrc == CURLM_OK);
+			$aXml = array();
 			foreach ($curlHls as $ch)
 			{
 				$tXml = simplexml_load_string(curl_multi_getcontent($ch));
@@ -175,6 +157,7 @@ class rssMerger {
 				if ($tXml) $aXml[] = $tXml;
 			}
 		}
+		/** Feed are loaded, parsing them */
 		foreach ($aXml as $xml)
 		{
 			$feedNbItems = count($xml->channel->item);
@@ -187,18 +170,8 @@ class rssMerger {
 				$new['pubDate'] = $item->pubDate;
 				$new['guid'] = $item->guid?$item->guid:$item->link; // not a real GUID if not provided, but unique and enought to validate the RSS feed
 				$new['date'] = strtotime($item->pubDate);
-				if ($this->XML_Util)
-				{
-					foreach ($new as $k=>$v)
-					{
-						$new[$k] = \XML_Util::replaceEntities(html_entity_decode($v),XML_UTIL_ENTITIES_XML,$this->xmlEncoding);
-					}
-				}else{
-					foreach ($new as $k=>$v)
-					{
-						$new[$k] = htmlentities($v);
-					}
-				}
+				foreach ($new as $k=>$v)
+					$new[$k] = '<![CDATA['.html_entity_decode($v,ENT_COMPAT | ENT_HTML401,function_exists('mb_detect_encoding')?mb_detect_encoding($v):'UTF-8').']]>';
 				array_push($rssItems, $new );
 			}
 		}
@@ -247,6 +220,13 @@ class rssMerger {
 	 * @return string the RSS formatted string with all that stuff
 	 * */
 	protected function outputXML($rssItems) {
+		/** if there no item, and there is data in cache, even old, we use them instead */
+		if (!count($rssItems)
+			&& $this->cache
+			&& $this->cache->checkRSSCacheExists($this->getFeedId()))
+				return $this->cache->getRSSCache($this->getFeedId());
+
+		/** Back to normal use */
 		$t=$n='';
 		if ($this->formatted) {
 			$t="\t";
@@ -268,7 +248,7 @@ class rssMerger {
 			$output .= $t.$t.$t . '<title>' . $item['title'] . '</title>' . $n;
 			$output .= $t.$t.$t . '<link>' . $item['link']  . '</link>' . $n;
 			$output .= $t.$t.$t . '<guid>' . $item['guid']  . '</guid>' . $n;
-			$output .= $t.$t.$t . '<description><![CDATA[' . $item['description'] . ']]></description>' . $n;
+			$output .= $t.$t.$t . '<description>' . $item['description'] . '</description>' . $n;
 			$output .= $t.$t.$t . '<pubDate>' . $item['pubDate'] . '</pubDate>' . $n;
 			$output .= $t.$t . '</item>' . $n.$n;
 		}

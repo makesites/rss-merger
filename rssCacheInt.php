@@ -9,7 +9,7 @@ namespace Taophp;
  * @license http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU Public License version 2
  * @copyright 2014 Stéphane Mourey <stephane.mourey@impossible-exil.info>
  * @author Stéphane Mourey <stephane.mourey@impossible-exil.info>
- * @version 2.3.1-beta Valid RSS Rogers
+ * @version 2.3.2-beta Time Limited Edition
  * */
 
 interface rssCacheInt {
@@ -40,5 +40,14 @@ interface rssCacheInt {
 	* @return bool true if usable, false if not
 	* */
 	public function checkRSSCache($feedId);
+
+	/**
+	* Check if data exist in cache (even too old)
+	*
+	* @param string $feedId a unique id for the feed to store
+	*
+	* @return bool true if data exist, false if not
+	* */
+	public function checkRSSCacheExists($feedId);
 
 }

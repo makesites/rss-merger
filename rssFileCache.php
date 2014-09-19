@@ -11,7 +11,7 @@ namespace Taophp;
  * @author Stéphane Mourey <stephane.mourey@impossible-exil.info>
  * @copyright 2009-2011 Makis Tracend <makis@makesites.cc>
  * @author Makis Tracend
- * @version 2.3.1-beta Valid RSS Rogers
+ * @version 2.3.2-beta Time Limited Edition
  * */
 
 class rssFileCache implements rssCacheInt {
@@ -63,7 +63,7 @@ class rssFileCache implements rssCacheInt {
 	 * */
 	public function checkRSSCache($feedId){
 		$filename = $this->getFileFullNameFromFeedId($feedId);
-		return file_exists($filename)
+		return $this->checkRSSCacheExists($feedId)
 						&& filesize($filename)
 						&& (time()-filemtime($filename) < $this->maxAge);
 	}
@@ -90,4 +90,15 @@ class rssFileCache implements rssCacheInt {
 		return $feedId.'.rss';
 	}
 
+	/**
+	* Check if data exist in cache (even too old)
+	*
+	* @param string $feedId a unique id for the feed to store
+	*
+	* @return bool true if data exist, false if not
+	* */
+	public function checkRSSCacheExists($feedId){
+		$filename = $this->getFileFullNameFromFeedId($feedId);
+		return file_exists($filename) && is_readable($this->getFileFullNameFromFeedId($feedId));
+	}
 }
