@@ -11,11 +11,11 @@ namespace Taophp;
  * @author Stéphane Mourey <stephane.mourey@impossible-exil.info>
  * @copyright 2009-2011 Makis Tracend <makis@makesites.cc>
  * @author Makis Tracend
- * @version 2.4.0-beta Atoms welcome
+ * @version 2.4.1-beta Atoms welcome
  * */
 
 class rssMerger {
-	const SCRIPT_VERSION = '2.3.0-beta';
+	const SCRIPT_VERSION = '2.4.1-beta';
 	const SCRIPT_NAME = 'Rss Merger';
 	const SCRIPT_URL = 'https://github.com/taophp/rss-merger';
 
@@ -194,8 +194,10 @@ class rssMerger {
 				$new['pubDate'] = $item->pubDate;
 				$new['guid'] = $item->guid?$item->guid:$item->link; // not a real GUID if not provided, but unique and enought to validate the RSS feed
 				$new['date'] = strtotime($item->pubDate);
+				$encOri = function_exists('mb_detect_encoding')?mb_detect_encoding($v):'UTF-8';
+				if ($encOri=='ASCII') $encOri = 'UTF-8';
 				foreach ($new as $k=>$v)
-					$new[$k] = '<![CDATA['.html_entity_decode($v,ENT_COMPAT | ENT_HTML401,function_exists('mb_detect_encoding')?mb_detect_encoding($v):'UTF-8').']]>';
+					$new[$k] = '<![CDATA['.html_entity_decode($v,ENT_COMPAT | ENT_HTML401,$encOri).']]>';
 				array_push($rssItems, $new );
 			}
 		}
@@ -317,13 +319,13 @@ class rssMerger {
 	 * @return string the converted string
 	 * */
 	static public function convertFromAtom($source){
-		$chan = new DOMDocument();
+		$chan = new \DOMDocument();
 		$chan->loadXML($source);
 
-		$sheet = new DOMDocument();
-		$sheet->load('atom2rss/atom2rss.xsl');
+		$sheet = new \DOMDocument();
+		$sheet->load(__DIR__.'/atom2rss/atom2rss.xsl');
 
-		$processor = new XSLTProcessor();
+		$processor = new \XSLTProcessor();
 		$processor->registerPHPFunctions();
 		$processor->importStylesheet($sheet);
 		return $processor->transformToXML($chan);
