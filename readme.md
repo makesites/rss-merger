@@ -1,6 +1,6 @@
 ########################################################################
 
-RSS Merger 2.3.2-beta Time Limited Edition
+RSS Merger 2.4.0-beta Atoms welcome
 
 Forked by Stéphane Mourey (stephane.mourey@impossible-exil.info)
 URL: http://impossible-exil.info
@@ -11,7 +11,7 @@ URL: http://www.makesites.cc/projects/rss_merger
 
 Description
 ===========
-This script will load a number of RSS feeds and compile them into one RSS 2.0 file. You can use it to present a mash-up of your news from different places (blogs, twitter etc.) or just present news from other sources around the Net.
+This script will load a number of RSS or Atom feeds and compile them into one RSS 2.0 file. You can use it to present a mash-up of your news from different places (blogs, twitter etc.) or just present news from other sources around the Net.
 This script is able to load all feeds asyncrhoniously if the [CURL extension](http://php.net/manual/ref.curl.php) is loaded, which provides a *significative* speed improvement.
 But you should *really* use it with a cache of some sort. `rssCacheInt` is a interface that will helps you to write your own, if you need, but RSS Merger come with the `rssFileCache` class, which enable the use of a cache directory on the file system.
 
@@ -32,14 +32,14 @@ $mymerger->setNumberOfItems2Gather(2);
 
 // Adding feeds
 // with the fluent interface
-$mymerger->addRssFeeds('http://exemple.com/feed.rss')
-				 ->addRssFeeds('http://exemple.com/feed2.rss')
+$mymerger->addFeeds('http://exemple.com/feed.rss')
+				 ->addFeeds('http://exemple.com/feed2.atom')
 // With one argument foreach new feed
-$mymerger->addRssFeeds('http://exemple.com/feed3.rss',
+$mymerger->addFeeds('http://exemple.com/feed3.rss',
 											 'http://exemple.com/feed4.rss')
 // Or with an array of feeds
-$mymerger->addRssFeeds(array(
-												'http://exemple.com/feed3.rss',
+$mymerger->addFeeds(array(
+												'http://exemple.com/feed3.atom',
 												'http://exemple.com/feed4.rss'
 											));
 
@@ -75,8 +75,8 @@ $mymerger	->addFeeds('http://exemple.com/feed5.rss,http://exemple.com/feed6.rss'
 $rssString = $mymerger->getMerged();
 ```
 
-Options andImportant Options
-============================
+Options and Important Options
+=============================
 ## **Asynchronious**
 By default, we use asynchronious loading of feeds. If you experience troubles like overloaded CPU, try to turn it off this way :
 
@@ -116,6 +116,8 @@ Dependencies
 
 Changelog
 =========
+16-10-2014	(v2.4.0-beta) Now accepting Atom feeds
+
 19-09-2014	(v2.3.2-beta) Make the script not to overload the CPU, neither to wait endlessly for a feed, adding the CDATA tag to all data, better solution that XML_Util....
 
 19-09-2014	(v2.3.1-beta) Make the script to provide valid feed in anycase (hope so!)
@@ -143,8 +145,7 @@ Changelog
 TODO
 ====
 
-* be compliant with PSR-0
-* use [Magpie RSS](https://packagist.org/packages/kellan/magpierss)
+* be compliant with PSR-4
 
 Copyright
 =========

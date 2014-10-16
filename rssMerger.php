@@ -11,7 +11,7 @@ namespace Taophp;
  * @author Stéphane Mourey <stephane.mourey@impossible-exil.info>
  * @copyright 2009-2011 Makis Tracend <makis@makesites.cc>
  * @author Makis Tracend
- * @version 2.3.2-beta Time Limited Edition
+ * @version 2.4.0-beta Atoms welcome
  * */
 
 class rssMerger {
@@ -80,18 +80,33 @@ class rssMerger {
 	 * @return rssMerger $this
 	 *
 	 * */
-	public function addRssFeeds($feeds) {
+	public function addFeeds($feeds) {
 		$args = func_get_args();
 		if (count($args)>2 || ( count($args)==2 && $args[1]!==0)) $feeds = $args;
 		if (is_string($feeds) && strpos($feeds,',')) $feeds = explode(',',$feeds);
 		if (is_array($feeds))
 			foreach ($feeds as $feed)
-				$this->addRssFeeds($feed);
+				$this->addFeeds($feed);
 		else {
 			$this->rssList[] = $feeds;
 		}
 		return $this;
 	}
+
+	/**
+	 *	Add feeds to the list of the feeds to grab
+	 *
+	 * @deprecated use addFeeds instead
+	 *
+	 * @param string|array $feeds the list of the feeds to add, in comma separated string or in an array
+	 *
+	 * @return rssMerger $this*
+	 *
+	 * */
+	public function addRssFeeds() {
+		return $this->addFeeds(func_get_args());
+	}
+
 
 	/**
 	 * The main method of the class, doing the merge
@@ -145,14 +160,23 @@ class rssMerger {
 			$aXml = array();
 			foreach ($curlHls as $ch)
 			{
-				$tXml = simplexml_load_string(curl_multi_getcontent($ch));
+				$tXml = false;
+				if (self::isRss($ch))
+					$tXml = simplexml_load_string(curl_multi_getcontent($ch));
+				if (self::isAtom($ch))
+					$tXml = simplexml_load_string(self::convertFromAtom(curl_multi_getcontent($ch)));
+				if (!$tXml)
+					$tXml = simplexml_load_string(curl_multi_getcontent($ch));
 				if ($tXml) $aXml[] = $tXml;
 			}
 		}else{
 			/** Synchronious download of feeds */
 			foreach ($this->rssList as $rssUrl)
 			{
-				$tXml = simplexml_load_file($rssUrl);
+				$headers = get_headers($rssUrl);
+				$tXml = strpos($headers['Content-Type'],'atom+xml') ?
+										simplexml_load_string(self::convertFromAtom(file_get_contents($rssUrl))) :
+										simplexml_load_file($rssUrl);
 				if($tXml)
 				if ($tXml) $aXml[] = $tXml;
 			}
@@ -241,7 +265,7 @@ class rssMerger {
 		$output .= $t.$t . '<pubDate>' . date('r') . '</pubDate>' . $n;
 		$output .= $t.$t . '<generator>'.self::SCRIPT_NAME.' v' . self::SCRIPT_VERSION . ' : '.self::SCRIPT_URL.' </generator>' . $n;
 		$output .= $t.$t . '<language>'.$this->lang.'</language>' . $n;
-		$output .= $t.$t . '<atom:link href="'.strtolower(substr($_SERVER[SERVER_PROTOCOL],0,strpos($_SERVER[SERVER_PROTOCOL],'/'))).'://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'].'" rel="self" type="application/rss+xml" />' . $n;
+		$output .= $t.$t . '<atom:link href="'.strtolower(substr($_SERVER['SERVER_PROTOCOL'],0,strpos($_SERVER[SERVER_PROTOCOL],'/'))).'://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'].'" rel="self" type="application/rss+xml" />' . $n;
 
 		foreach ($rssItems as $item) {
 			$output .= $t.$t . '<item>' . $n;
@@ -283,6 +307,48 @@ class rssMerger {
 			throw new \Exception('rssMerger::setCache expects an objet that implements the rssCacheInt interface. Implemented interfaces: '.print_r(class_implements($cache),true));
 		$this->cache = $cache;
 		return $this;
+	}
+
+	/**
+	 *	Convert an Atom string to an RSS string
+	 *
+	 * @param string $source the Atom string to convert
+	 *
+	 * @return string the converted string
+	 * */
+	static public function convertFromAtom($source){
+		$chan = new DOMDocument();
+		$chan->loadXML($source);
+
+		$sheet = new DOMDocument();
+		$sheet->load('atom2rss/atom2rss.xsl');
+
+		$processor = new XSLTProcessor();
+		$processor->registerPHPFunctions();
+		$processor->importStylesheet($sheet);
+		return $processor->transformToXML($chan);
+	}
+
+	/**
+	 *	test if a feed is RSS
+	 *
+	 * @param ressource $ch
+	 *
+	 * @return true or false
+	 * */
+	static public function isRss(&$ch) {
+		return strpos(curl_getinfo($ch, CURLINFO_CONTENT_TYPE),'rss+xml')?true:false;
+	}
+
+	/**
+	 *	test if a feed is Atom
+	 *
+	 * @param ressource $ch the feed to test
+	 *
+	 * @return true or false
+	 * */
+	static public function isAtom(&$ch) {
+		return strpos(curl_getinfo($ch, CURLINFO_CONTENT_TYPE),'atom+xml')?true:false;
 	}
 
 
