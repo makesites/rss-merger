@@ -18,7 +18,7 @@ class rssFileCache implements rssCacheInt {
 	/** @type string the directory used to store files*/
 	protected $dir;
 	/** @type int the maximum age of a usable cache in milliseconds */
-	public $maxAge = 1000; /** default: one second */
+	public $maxAge = 1; /** default: one second */
 
 	/**
 	 *	The constructor
