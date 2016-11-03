@@ -2,9 +2,12 @@
 
 RSS Merger 2.4.0-beta Atoms welcome
 
-Forked by Stéphane Mourey (stephane.mourey@impossible-exil.info)
-URL: http://impossible-exil.info
+Forked by Stéphane Mourey (steph@stephanemourey.fr)
+
+URL: http://stephanemourey.fr
+
 Created by: Makis Tracend (makis@makesites.cc)
+
 URL: http://www.makesites.cc/projects/rss_merger
 
 ########################################################################
