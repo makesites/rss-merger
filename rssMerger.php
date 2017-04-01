@@ -15,7 +15,7 @@ namespace Taophp;
  * */
 
 class rssMerger {
-	const SCRIPT_VERSION = '2.4.1-beta';
+	const SCRIPT_VERSION = '2.4.2-beta';
 	const SCRIPT_NAME = 'Rss Merger';
 	const SCRIPT_URL = 'https://github.com/taophp/rss-merger';
 
@@ -31,6 +31,14 @@ class rssMerger {
 	public $xmlEncoding = 'UTF-8';
 	/** @type string the language of the producted feed */
 	public $lang = 'en';
+	/** @type string the file name URL of the image of the feed */
+	public $imgURL;
+	/** @type string description for the image */
+	public $imgDesc;
+	/** @type int defines the width of the image. Default is 88. Maximum value is 144 */
+	public $imgWidth;
+	/** @type int defines the height of the image. Default is 31. Maximum value is 400 */
+	public $imgHeight;
 	/** @type int Max number of items to gather from each feed, 0 for all */
 	protected $nbItems2Gather = 0;
 	/** @type int Max number of items to produce in the result, 0 for all */
@@ -263,11 +271,33 @@ class rssMerger {
 		$output .= $t . '<channel>' . $n;
 		$output .= $t.$t . '<title>' . $this->siteName . '</title>' . $n;
 		$output .= $t.$t . '<link>' . $this->siteUrl . '</link>' . $n;
+		
+		if (!empty($this->imgURL)) {
+			$output .= $t.$t . '<image>' . $n;
+				$output .= $t.$t . '<url>' . $this->imgURL . '</url>' . $n;
+				$output .= $t.$t . '<title>' . $this->siteName . '</title>' . $n;
+				$output .= $t.$t . '<link>' . $this->siteUrl . '</link>' . $n;
+				if (!empty($this->imgWidth) && !empty($this->imgHeight)) {
+					$output .= $t.$t . '<width>' . $this->imgWidth . '</width>' . $n;
+					$output .= $t.$t . '<height>' . $this->imgHeight . '</height>' . $n;
+				}
+				if (!empty($this->imgDesc)) {
+					$output .= $t.$t . '<description>' . $this->imgDesc . '</description>' . $n;
+				}
+			$output .= $t.$t . '</image>' . $n;
+		}
 		$output .= $t.$t . '<description>' . $this->feedDesc . '</description>' . $n;
 		$output .= $t.$t . '<pubDate>' . date('r') . '</pubDate>' . $n;
 		$output .= $t.$t . '<generator>'.self::SCRIPT_NAME.' v' . self::SCRIPT_VERSION . ' : '.self::SCRIPT_URL.' </generator>' . $n;
 		$output .= $t.$t . '<language>'.$this->lang.'</language>' . $n;
-		$output .= $t.$t . '<atom:link href="'.strtolower(substr($_SERVER['SERVER_PROTOCOL'],0,strpos($_SERVER[SERVER_PROTOCOL],'/'))).'://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'].'" rel="self" type="application/rss+xml" />' . $n;
+		
+		/** Check if https is used. If so, return https for atom link */
+		if ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) {
+			$secProtocol = 'https';
+		} else {
+			$secProtocol = strtolower(substr($_SERVER['SERVER_PROTOCOL'],0,strpos($_SERVER[SERVER_PROTOCOL],'/')));
+		}
+		$output .= $t.$t . '<atom:link href="'. $secProtocol .'://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'].'" rel="self" type="application/rss+xml" />' . $n;
 
 		foreach ($rssItems as $item) {
 			$output .= $t.$t . '<item>' . $n;
