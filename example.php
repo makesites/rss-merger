@@ -25,13 +25,13 @@
 		error_log($e->getMessage());
 	}
 
-	// if $cache creation is successfull, associate it to the merger
+	// Optional - if $cache creation is successfull, associate it to the merger
 	if ($cache) $mymerger->setCache($cache);
 	
-	// Set the total number of items to produce (default is all)
+	// Optional - Set the total number of items to produce (default is all)
 	$mymerger->setNumberOfItems2Produce(0);
 
-	// Set the number of items to gather from each feed (default is all)
+	// Optional - Set the number of items to gather from each feed (default is all)
 	$mymerger->setNumberOfItems2Gather(0);
 	
 	// Add feed URLs
@@ -42,26 +42,51 @@
 		'https://roundcube.net/feeds/atom.xml',
 		'https://wordpress.org/news/feed/'
 	);
-
-	// Define RSS Name
+	
+	// Optional - Give a short name for each RSS feed URL which will be displayed in front of each entry in the summary
+	
+	$RSSfeedList = array(
+		0 => array(
+			'name' => 'GitLab',
+			'url' => 'https://about.gitlab.com/atom.xml'
+		),
+		1 => array(
+			'name' => 'OwnCloud',
+			'url' => 'https://owncloud.org/blogfeed/'
+		),
+		2 => array(
+			'name' => 'TeamSpeak',
+			'url' => 'http://forum.teamspeak.com/external.php?type=RSS2&forumids=91'
+		),
+		3 => array(
+			'name' => 'RoundCube',
+			'url' => 'https://roundcube.net/feeds/atom.xml'
+		),
+		4 => array(
+			'name' => 'WordPress',
+			'url' => 'https://wordpress.org/news/feed/'
+		),
+	);
+	
+	// Optional - Define RSS Name
 	$mymerger->siteName = 'Software updates';
 	
-	// Give a short Feed description
+	// Optional - Give a short Feed description
 	$mymerger->feedDesc = 'Merged RSS feed for software updates';
 	
-	// URL of the feed
+	// Optional - URL of the feed
 	$mymerger->siteUrl = 'https://www.example.com/rss/example.php';
 	
-	// Image name for the feed image (Not used if empty)
+	// Optional - Image name for the feed image (Not used if empty)
 	$mymerger->imgURL = 'https://www.example.com/rss/update-feed.png';
 	
-	// Description for the feed image (Not used if empty)
+	// Optional - Description for the feed image (Not used if empty)
 	$mymerger->imgDesc = 'Software updates feed image';
 	
-	// Feed image width (default is 88. Maximum value is 144. Not used if empty)
+	// Optional - Feed image width (default is 88. Maximum value is 144. Not used if empty)
 	$mymerger->imgWidth = 88;
 	
-	// Feed image height (default is 31. Maximum value is 400. Not used if empty)
+	// Optional - Feed image height (default is 31. Maximum value is 400. Not used if empty)
 	$mymerger->imgHeight = 31;
 	
 	// Get the resulting RSS feed in a string
