@@ -225,9 +225,9 @@ class rssMerger {
 				$new['pubDate'] = $item->pubDate;
 				$new['guid'] = $item->guid?$item->guid:$item->link; // not a real GUID if not provided, but unique and enought to validate the RSS feed
 				$new['date'] = strtotime($item->pubDate);
-				$encOri = function_exists('mb_detect_encoding')?mb_detect_encoding($v):'UTF-8';
-				if ($encOri=='ASCII') $encOri = 'UTF-8';
 				foreach ($new as $k=>$v)
+					$encOri = function_exists('mb_detect_encoding')?mb_detect_encoding($v):'UTF-8';
+					if ($encOri=='ASCII') $encOri = 'UTF-8';
 					$new[$k] = '<![CDATA['.html_entity_decode($v,ENT_COMPAT | ENT_HTML401,$encOri).']]>';
 					
 				// Adding source URL html_entity_decode to stay W3C Validator compatible
