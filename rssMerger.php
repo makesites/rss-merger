@@ -344,7 +344,7 @@ class rssMerger {
 		if ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) {
 			$secProtocol = 'https';
 		} else {
-			$secProtocol = strtolower(substr($_SERVER['SERVER_PROTOCOL'],0,strpos($_SERVER[SERVER_PROTOCOL],'/')));
+			$secProtocol = strtolower(substr($_SERVER['SERVER_PROTOCOL'],0,strpos($_SERVER['SERVER_PROTOCOL'],'/')));
 		}
 		
 		$output .= $t.$t . '<atom:link href="'. $secProtocol .'://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'].'" rel="self" type="application/rss+xml" />' . $n;
