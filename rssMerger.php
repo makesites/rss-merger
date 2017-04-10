@@ -51,7 +51,10 @@ class rssMerger {
 	public $asynchronious = true;
 	/** @type int the maximum number of seconds to wait for a feed to merge */
 	public $curlTimeOut = 10;
-
+	/** @ type array list of RSS Urls and short names */
+	public $RSSfeedList;
+	
+	
 	/**
 	 *	Set the number of items to gather from each feed
 	 *
@@ -100,7 +103,6 @@ class rssMerger {
 		}
 		return $this;
 	}
-
 	/**
 	 *	Add feeds to the list of the feeds to grab
 	 *
@@ -168,13 +170,30 @@ class rssMerger {
 			$aXml = array();
 			foreach ($curlHls as $ch)
 			{
+				/** Get RSS URL from curl request */
+				$rss_org_url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
 				$tXml = false;
-				if (self::isRss($ch))
+				if (self::isRss($ch)){
+					/** rss+xml content detected */
 					$tXml = simplexml_load_string(curl_multi_getcontent($ch));
-				if (self::isAtom($ch))
+					$tXml->channel->addChild('sourceURL', $rss_org_url);
+				}
+				if (self::isAtom($ch)) {
+					/** atom+xml content detected */
 					$tXml = simplexml_load_string(self::convertFromAtom(curl_multi_getcontent($ch)));
-				if (!$tXml)
+					$tXml->channel->addChild('sourceURL', $rss_org_url);
+				}
+				
+				if (curl_getinfo($ch, CURLINFO_CONTENT_TYPE) == 'text/xml' || curl_getinfo($ch, CURLINFO_CONTENT_TYPE) == 'application/xml') {
+					/** text/xml or application/xml content detected */
+					$tXml = simplexml_load_string(self::convertFromAtom(curl_multi_getcontent($ch)));
+					$tXml->channel->addChild('sourceURL', $rss_org_url);
+				}			
+				if (!$tXml) {
+					/** not supported content detected */
 					$tXml = simplexml_load_string(curl_multi_getcontent($ch));
+					$tXml->channel->addChild('sourceURL', htmlspecialchars($rss_org_url));
+				}
 				if ($tXml) $aXml[] = $tXml;
 			}
 		}else{
@@ -186,7 +205,11 @@ class rssMerger {
 										simplexml_load_string(self::convertFromAtom(file_get_contents($rssUrl))) :
 										simplexml_load_file($rssUrl);
 				if($tXml)
-				if ($tXml) $aXml[] = $tXml;
+				if ($tXml) {
+					// Add Feed source URL to RSS channel element
+					$tXml->channel->addChild('sourceURL', $rssUrl);
+					$aXml[] = $tXml;
+				}
 			}
 		}
 		/** Feed are loaded, parsing them */
@@ -196,7 +219,7 @@ class rssMerger {
 			$maxNum = $this->nbItems2Gather ? min($feedNbItems, $this->nbItems2Gather) : $feedNbItems;
 			for ($i=0; $i< $maxNum; $i++) {
 				$item = $xml->channel->item[$i];
-				$new['title'] = $item->title;
+				$new['title'] = self::getFeedIdentifier($xml->channel->sourceURL) . $item->title;
 				$new['link'] = $item->link;
 				$new['description'] = $item->description;
 				$new['pubDate'] = $item->pubDate;
@@ -206,7 +229,10 @@ class rssMerger {
 				if ($encOri=='ASCII') $encOri = 'UTF-8';
 				foreach ($new as $k=>$v)
 					$new[$k] = '<![CDATA['.html_entity_decode($v,ENT_COMPAT | ENT_HTML401,$encOri).']]>';
-				array_push($rssItems, $new );
+					
+				// Adding source URL html_entity_decode to stay W3C Validator compatible
+				$new['source'] = htmlspecialchars($xml->channel->sourceURL);
+				array_push($rssItems, $new);
 			}
 		}
 		//sort the items according to date
@@ -215,7 +241,30 @@ class rssMerger {
 			$rssItems = array_slice($rssItems,0,$this->nbItems2Produce);
 		return $this->outputXML($rssItems);
 	}
-
+	
+	/**
+	 *	Match RSS feed URL to a user friendly name
+	 *
+	 * @param string $sourceURL
+	 *
+	 * @return string with user friendly name if match was found. otherwise empty string $this
+	 *
+	 * */
+	function getFeedIdentifier($sourceURL){
+		if (!empty($this->RSSfeedList)) {
+			$key = array_search($sourceURL, array_column($this->RSSfeedList, 'url'));
+			if ($key !== false) {
+				return '[' . $this->RSSfeedList[$key]['name'] . '] ';
+			} else {
+				return '';
+			}
+		} else {
+			return '';
+		}
+	}
+	
+	
+	
 	/**
 	 *	Check if the required curl functions are available
 	 *
@@ -297,6 +346,7 @@ class rssMerger {
 		} else {
 			$secProtocol = strtolower(substr($_SERVER['SERVER_PROTOCOL'],0,strpos($_SERVER[SERVER_PROTOCOL],'/')));
 		}
+		
 		$output .= $t.$t . '<atom:link href="'. $secProtocol .'://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'].'" rel="self" type="application/rss+xml" />' . $n;
 
 		foreach ($rssItems as $item) {
@@ -306,6 +356,10 @@ class rssMerger {
 			$output .= $t.$t.$t . '<guid>' . $item['guid']  . '</guid>' . $n;
 			$output .= $t.$t.$t . '<description>' . $item['description'] . '</description>' . $n;
 			$output .= $t.$t.$t . '<pubDate>' . $item['pubDate'] . '</pubDate>' . $n;
+			/** Add source RSS feed URL to feed item if a valid one was found */
+			if ($item['source'] != '') {
+				$output .= $t.$t.$t . '<source url="' . $item['source'] . '">' . $item['source'] . '</source>' . $n;
+			}
 			$output .= $t.$t . '</item>' . $n.$n;
 		}
 		$output .= $t . '</channel>' . $n;
