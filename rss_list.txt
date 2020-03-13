@@ -1,3 +1,0 @@
-http://www.theinquirer.net/inquirer.rss
-http://feeds.feedburner.com/zdnet/open-source?format=xml
-http://alistapart.com/rss.xml
